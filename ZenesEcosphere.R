@@ -987,10 +987,13 @@ prot2 = distinct(fullpotryears, group) %>%
   arrange(group)
 prot2$yloc = 1.5
 prot2$label = c("p < 0.001", "p < 0.001", "p < 0.001")
+letter <- data.frame(x=.5,y = -1.5, label="A")
+
 potrboxjitter <- potrboxjitter + 
   ylim(-1.5,1.5) +
   geom_text(data = prot2, aes(y = yloc, label = label), 
-            position = position_dodge(width = .75)) + geom_hline(yintercept=0)
+            position = position_dodge(width = .75)) + geom_hline(yintercept=0)+ 
+  geom_text(data = letter, aes(x = x, y = y, label = label), inherit.aes = FALSE)
 
 #######juos
 withoutjuos <- withoutjuos
@@ -1037,10 +1040,13 @@ prot2 = distinct(fulljuosyears, group) %>%
   arrange(group)
 prot2$yloc = 1.5
 prot2$label = c("p = 0.005", "p = 0.003", "p = 0.96")
+letter <- data.frame(x=.5,y = -1.5, label="B")
+
 juosboxjitter <- juosboxjitter + 
   ylim(-1.5,1.5) +
   geom_text(data = prot2, aes(y = yloc, label = label), 
-            position = position_dodge(width = .75)) + geom_hline(yintercept=0)
+            position = position_dodge(width = .75)) + geom_hline(yintercept=0)+ 
+  geom_text(data = letter, aes(x = x, y = y, label = label), inherit.aes = FALSE)
 
 
 
@@ -1097,10 +1103,13 @@ prot2 = distinct(fullpipoyears, group) %>%
   arrange(group)
 prot2$yloc = 1.5
 prot2$label = c("p < 0.001", "p < 0.001", "p < 0.001")
+letter <- data.frame(x=.5,y = -1.5, label="D")
+
 pipoboxjitter <- pipoboxjitter + 
   ylim(-1.5,1.5) +
   geom_text(data = prot2, aes(y = yloc, label = label), 
-            position = position_dodge(width = .75)) + geom_hline(yintercept=0)
+            position = position_dodge(width = .75)) + geom_hline(yintercept=0)+ 
+  geom_text(data = letter, aes(x = x, y = y, label = label), inherit.aes = FALSE)
 
 
 
@@ -1159,11 +1168,13 @@ prot2 = distinct(fullpienyears, group) %>%
   arrange(group)
 prot2$yloc = 1.5
 prot2$label = c("p < 0.001", "p < 0.001", "p < 0.001")
+letter <- data.frame(x=.5,y = -1.5, label="E")
 
 pienboxjitter <- pienboxjitter + 
   ylim(-1.5,1.5) +
   geom_text(data = prot2, aes(y = yloc, label = label), 
-            position = position_dodge(width = .75)) + geom_hline(yintercept=0)
+            position = position_dodge(width = .75)) + geom_hline(yintercept=0)+ 
+  geom_text(data = letter, aes(x = x, y = y, label = label), inherit.aes = FALSE)
 
 
 ###pied
@@ -1214,13 +1225,13 @@ summary(piedaov) #p = 0.875
 prot2 = distinct(fullpiedyears, group) %>%
   arrange(group)
 prot2$yloc = 1.5
-prot2$label = c("p = .65", "p = 0.89", "p = 0.36")
-
+prot2$label = c("p = 0.65", "p = 0.89", "p = 0.36")
+letter <- data.frame(x=.5,y = -1.5, label="C")
 piedboxjitter <- piedboxjitter + 
   ylim(-1.5,1.5) +
   geom_text(data = prot2, aes(y = yloc, label = label), 
-            position = position_dodge(width = .75)) + geom_hline(yintercept=0)
-
+            position = position_dodge(width = .75)) + geom_hline(yintercept=0) + 
+  geom_text(data = letter, aes(x = x, y = y, label = label), inherit.aes = FALSE)
 
 
 ######Pdf exportation of figure 3#####  ######Pdf exportation of figure 3#####  
@@ -1928,18 +1939,54 @@ latlong$Species <- gsub('PIED', 'Pinyon', latlong$Species)
 
 ####Figure 1 map
 library(ggplot2)
+library(ggspatial)
+library(sf)
+library(maps)
+
 gusa <- map_data("state")
 gusa <- subset(gusa, long < -100)
 gusa <- subset(gusa, lat < 45)
-mapfigure <- ggplot(gusa) + geom_polygon(aes(x=long, y=lat, group=group), fill=NA, color="darkgrey") + coord_map() +
-  geom_point(data = latlong, aes(x=latlong$LON_FUZZED, y= latlong$LAT_FUZZED, color = latlong$Species)) +
-  xlab("Longtiude") + ylab ("Latitude") + labs(color="Species") +
-  annotate("text", x=-111,y=33, label="AZ") +
-  annotate("text", x=-111, y=39.5, label = "UT")+
-  annotate("text", x=-107.5, y=39.5, label = "CO") +
-  annotate("text", x =-107.5, y=33, label = "NM")
+
+gusa_sf <- st_as_sf(maps::map("state", regions = c("arizona", "california", "colorado", "idaho", "kansas", "montana", "nebraska", "nevada", "new mexico", "north dakota", "oklahoma", "oregon", "south dakota", "texas", "utah", "washington", "wyoming"), 
+                              fill=TRUE, plot=FALSE))
+
+gusa_proj <- st_transform(gusa_sf, crs = 5070)
+
+latlong_sf <- st_as_sf(latlong, coords = c("LON_FUZZED", "LAT_FUZZED"), crs = 4326)
+
+latlong_proj <- st_transform(latlong_sf, crs = 5070)
+
+states_to_label <- c("utah", "colorado", "arizona", "new mexico")
+label_data_manual <- data.frame(state_label = c("AZ", "CO", "NM", "UT"), long=c(-111,-107.5,-107.5,-111), lat=c(33,39.5,33,39.5))
+label_sf <- st_as_sf(label_data_manual, coords=c("long", "lat"),crs=4326)
+label_proj <- st_transform(label_sf,crs=5070)
+mapfigure <- ggplot() +
+  geom_sf(data = gusa_proj, fill = NA, color = "darkgrey") +
+  geom_sf(data = latlong_proj, aes(color = Species)) +
+  coord_sf() + # This ensures the plot uses the projected CRS
+  geom_sf_text(data = label_proj, aes(label = state_label), color = "black", size = 3.5) +
+  labs(x=NULL,y=NULL) +
+
+    annotation_scale(
+    location = "br", 
+    style = "ticks", 
+    width_hint = 0.2, 
+    unit_category = "metric"
+  ) +
+  
+  annotation_north_arrow(
+    location = "bl", 
+    pad_x = unit(0.2, "in"), 
+    pad_y = unit(0.2, "in"), 
+    style = north_arrow_fancy_orienteering
+  ) +
+  theme_minimal() +
+  labs(color = "Species")
+
 mapfigure
+
 ggsave(file="Fig1MapFIAPlots.png", plot=mapfigure,units="in", width=6,height=4,dpi=600)
+
 pdf(file="Fig1MapFIAPlots.pdf", width=6,height=4, paper='special')
 mapfigure
 dev.off()
