@@ -1,6 +1,9 @@
-This is a code that was used to analyze raw tree ring widths for a manuscript titled:
-Complex trajectories of tree growth in the southwestern United States after severe drought
-Currently under review: Ecosphere ECS25-0062
+This is a code that was used to analyze raw tree ring widths for a manuscript:
+Ecosphere
+Article
+ECS25-0062 - Complex trajectories of tree growth in the southwestern United States after severe drought
+Nicole Zenes, Leander D. L. Anderegg, Kiona Ogle, Drew M. P. Peltier, and William R. L.Anderegg
+
 ZenesEcosphere.R is the main data analysis.
 terraclimR.R is the script to download TerraClim (1/24°, ~4 km high spatial resolution global
 dataset; Abatzoglou et al. 2018).
